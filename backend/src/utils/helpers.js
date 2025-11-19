@@ -12,6 +12,8 @@ const handleValidationErrors = (req, res, next) => {
       value: error.value,
     }));
 
+    console.warn('Validation errors:', formattedErrors);
+
     return res.status(400).json({
       error: 'Dados inválidos',
       message: '🚀 Quase lá! Só falta corrigir alguns campos para continuar a jornada de criação.',
@@ -268,3 +270,4 @@ module.exports = {
   formatPhoneBR,
   generateProjectColor,
 };
+
