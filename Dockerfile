@@ -31,10 +31,16 @@ ENV NODE_ENV=production \
     PORT=3001 \
     SERVE_FRONTEND=true
 WORKDIR /app/backend
+
+RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
+
 COPY --from=backend-build /app/backend ./
 COPY --from=frontend-build /app/frontend/dist ./public
-RUN chown -R node:node /app/backend
-USER node
-CMD ["node", "src/server.js"]
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]
 EXPOSE 3001
 CMD ["node", "src/server.js"]
