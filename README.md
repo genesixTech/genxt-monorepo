@@ -99,5 +99,16 @@ Para o deploy, você pode simplesmente fazer o upload de todo o conteúdo deste 
 
 O frontend foi configurado para buscar a API em um caminho relativo (`/api`), o que é ideal para deploy em plataformas que suportam proxy reverso ou para quando o frontend e o backend são servidos pelo mesmo domínio.
 
+### Deploy com Docker / EasyPanel
+
+O reposit��rio agora inclui um `Dockerfile` na raiz que constr��i o frontend (Vite) e copia o build para o backend Express servir os arquivos est��ticos na mesma porta da API (`3001`). Para us��-lo no EasyPanel:
+
+1. Crie um app baseado em Docker e informe o `Dockerfile` padr��o deste reposit��rio.
+2. Configure as vari��veis de ambiente do backend (`PORT`, `SECRET_KEY`, `FRONTEND_URL`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, etc.). Se quiser desligar a entrega do frontend por esse cont��iner, defina `SERVE_FRONTEND=false`.
+3. Mapeie a porta interna `3001` para a porta externa desejada.
+4. Durante o build o Docker executar�� `pnpm install && pnpm build` no `frontend/`, `npm ci --omit=dev` no `backend/` e copiar�� o build para `backend/public`, permitindo que o Express sirva a SPA e as rotas `/api` simultaneamente.
+
+Assim que o cont��iner estiver em execu��ǜo, o dom��nio configurado no EasyPanel exibir�� o frontend compilado enquanto as chamadas `fetch` para `/api` permanecem dentro do mesmo cont��iner, sem necessidade de proxy adicional.
+
 ---
 *Este arquivo foi gerado automaticamente como parte do processo de unificação do código-fonte.*
