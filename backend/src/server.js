@@ -66,11 +66,8 @@ app.use('/api/analytics', require('./routes/analytics'));
 if (SHOULD_SERVE_FRONTEND && fs.existsSync(FRONTEND_DIST_PATH)) {
   app.use(express.static(FRONTEND_DIST_PATH));
 
-  app.get('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) {
-      return next();
-    }
-    return res.sendFile(path.join(FRONTEND_DIST_PATH, 'index.html'));
+  app.get(/^\/(?!api|health).*/, (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIST_PATH, 'index.html'));
   });
 }
 
