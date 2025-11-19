@@ -51,22 +51,13 @@ const LoginPage = ({ onNavigate, onLogin }) => {
     setIsLoading(true);
     
     try {
-      // Simular chamada para API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Aqui você faria a chamada real para o backend
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      
-      // Por enquanto, simular sucesso
-      onLogin && onLogin();
-      onNavigate('dashboard');
-      
+      if (onLogin) {
+        await onLogin(formData.email, formData.password);
+      } else {
+        onNavigate?.('dashboard');
+      }
     } catch (error) {
-      setErrors({ general: 'Erro ao fazer login. Tente novamente.' });
+      setErrors({ general: error?.message || 'Erro ao fazer login. Tente novamente.' });
     } finally {
       setIsLoading(false);
     }

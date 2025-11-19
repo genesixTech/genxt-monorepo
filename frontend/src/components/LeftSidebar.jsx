@@ -200,14 +200,16 @@ const LeftSidebar = ({ activeStep, onStepChange }) => {
           <div className="p-1">
             {steps.map((step, index) => {
               const Icon = step.icon;
-              //const isActive = activeStep === step.id
+              const isActive = activeStep === step.id;
 
               return (
                 <Button
                   key={step.id}
                   variant="ghost"
                   onClick={() => onStepChange?.(step.id)}
-                  className={`w-full justify-start p-2 mb-1 h-auto text-sm cursor-pointe`}
+                  className={`w-full justify-start p-2 mb-1 h-auto text-sm cursor-pointer ${
+                    isActive ? "bg-blue-50 text-blue-700 border-l-4 border-blue-500" : ""
+                  }`}
                 >
                   <div className="flex items-start space-x-2 w-full">
                     {/* Ícone e Status */}

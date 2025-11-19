@@ -77,40 +77,40 @@ const stepData = {
     iaMessage: "Conheça seu Usuário! 🧑‍💻\n\nDescreva suas Personas. Quem são eles? Quais são seus objetivos, frustrações e como seu produto se encaixa na vida deles?",
     placeholder: "Crie suas Personas...",
   },
-  "user-research": {
-    id: "user-research",
+  "pesquisa-usuarios": {
+    id: "pesquisa-usuarios",
     title: "Pesquisa de Usuário",
     component: UserResearchPage,
     description: "Planejamento e execução da pesquisa de usuário.",
     iaMessage: "Pesquisa em Ação! 📝\n\nQuais métodos de pesquisa você usará? Quais perguntas você precisa responder para validar suas hipóteses?",
     placeholder: "Planeje sua pesquisa...",
   },
-  "hypothesis-testing": {
-    id: "hypothesis-testing",
+  "validacao-hipoteses": {
+    id: "validacao-hipoteses",
     title: "Teste de Hipóteses",
     component: HypothesisTestingPage,
     description: "Definição e teste das hipóteses de solução.",
     iaMessage: "Hora de Testar! ✅\n\nQuais hipóteses você vai testar? Como você vai medir o sucesso ou o fracasso de cada teste?",
     placeholder: "Defina seus testes de hipóteses...",
   },
-  features: {
-    id: "features",
-    title: "Features",
+  "features-priorizacao": {
+    id: "features-priorizacao",
+    title: "Funcionalidades e Prioriza��o",
     component: FeaturesPage,
     description: "Definição e priorização das funcionalidades do produto.",
     iaMessage: "O que o Produto Faz? ⚙️\n\nListe e priorize as funcionalidades. Use métodos como MoSCoW ou Kano. Quais são as essenciais (Must Have)?",
     placeholder: "Liste e priorize as funcionalidades...",
   },
-  "user-stories-flows": {
-    id: "user-stories-flows",
+  "user-stories-fluxos": {
+    id: "user-stories-fluxos",
     title: "User Stories e Fluxos",
     component: UserStoriesFlowsPage,
     description: "Criação de User Stories e mapeamento dos fluxos de usuário.",
     iaMessage: "Como o Usuário Interage? 🗺️\n\nEscreva as User Stories no formato 'Como um [tipo de usuário], eu quero [objetivo], para que [benefício]'. Mapeie os fluxos principais.",
     placeholder: "Crie as User Stories e os fluxos...",
   },
-  "criteria-metrics": {
-    id: "criteria-metrics",
+  "criterios-metricas": {
+    id: "criterios-metricas",
     title: "Critérios e Métricas",
     component: CriteriaMetricsPage,
     description: "Definição dos critérios de sucesso e métricas (KPIs).",
@@ -125,8 +125,8 @@ const stepData = {
     iaMessage: "Onde Vamos? 🛣️\n\nOrganize as funcionalidades no Roadmap (curto, médio e longo prazo) e detalhe o Backlog para as próximas iterações.",
     placeholder: "Crie o Roadmap e o Backlog...",
   },
-  prototype: {
-    id: "prototype",
+  prototipo: {
+    id: "prototipo",
     title: "Protótipo",
     component: PrototypePage,
     description: "Criação e teste do protótipo de alta fidelidade.",
@@ -141,8 +141,8 @@ const stepData = {
     iaMessage: "O Documento Mestre! 📜\n\nRevise e finalize o PRD. Ele deve conter todas as informações necessárias para o time de desenvolvimento.",
     placeholder: "Finalize o PRD...",
   },
-  launch: {
-    id: "launch",
+  lancamento: {
+    id: "lancamento",
     title: "Lançamento",
     component: LaunchPage,
     description: "Plano de lançamento e estratégia Go-to-Market.",
@@ -151,26 +151,20 @@ const stepData = {
   },
   // Adicionar dados para outras etapas aqui
 };
-    id: "discovery",
-    title: "Discovery",
-    description: "Exploração do problema e levantamento de hipóteses iniciais",
-    iaMessage:
-      "Hora do Discovery! 🔍\n\nAgora que entendemos o problema, vamos explorar as oportunidades. Quais são as hipóteses iniciais que você tem para a solução? Quais funcionalidades você imagina?",
-    placeholder: "Compartilhe suas hipóteses e ideias de funcionalidades...",
-    tasks: [
-      { id: 1, text: "Levantar hipóteses de solução" },
-      { id: 2, text: "Brainstorm de funcionalidades" },
-      { id: 3, text: "Mapear stakeholders" },
-      { id: 4, text: "Definir escopo inicial" },
-    ],
-  },
-  // Adicionar dados para outras etapas aqui
-};
 
 // Componente principal da aplicação
 function AppContent() {
   const { isAuthenticated, isLoading, user, login, register, logout } = useAuth();
-  const [activePage, setActivePage] = useState("dashboard");
+  const PUBLIC_PAGES = ["login", "register", "forgot-password"];
+  const getInitialPage = () => {
+    if (typeof window === "undefined") {
+      return "login";
+    }
+    const initialHash = window.location.hash.replace("#", "");
+    return initialHash || "login";
+  };
+
+  const [activePage, setActivePage] = useState(getInitialPage);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -178,17 +172,20 @@ function AppContent() {
   // Hash routing
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.substring(1); // Remove o #
-      if (hash) {
-        setActivePage(hash);
-      } else {
-        // Se não há hash e usuário está autenticado, ir para dashboard
-        if (isAuthenticated) {
-          setActivePage("dashboard");
-        } else {
-          setActivePage("login");
+      if (typeof window === "undefined") return;
+      const hash = window.location.hash.replace("#", ""); // Remove o #
+      const targetPage = hash || (isAuthenticated ? "dashboard" : "login");
+      const isPublicPage = PUBLIC_PAGES.includes(targetPage);
+
+      if (!isAuthenticated && !isPublicPage) {
+        setActivePage("login");
+        if (window.location.hash !== "#login") {
+          window.location.hash = "login";
         }
+        return;
       }
+
+      setActivePage(targetPage);
     };
 
     // Verificar hash inicial
@@ -204,15 +201,38 @@ function AppContent() {
 
   // Redirecionar para login se não autenticado
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && !['login', 'register', 'forgot-password'].includes(activePage)) {
+    if (!isLoading && !isAuthenticated && !PUBLIC_PAGES.includes(activePage)) {
       setActivePage("login");
-      window.location.hash = "login";
+      if (typeof window !== "undefined") {
+        window.location.hash = "login";
+      }
+    }
+  }, [isAuthenticated, isLoading, activePage]);
+
+  // Quando autenticar, levar usuário para o dashboard caso esteja em páginas públicas
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && PUBLIC_PAGES.includes(activePage)) {
+      setActivePage("dashboard");
+      if (typeof window !== "undefined") {
+        window.location.hash = "dashboard";
+      }
     }
   }, [isAuthenticated, isLoading, activePage]);
 
   const handleNavigate = (page) => {
-    setActivePage(page);
-    window.location.hash = page;
+    const targetPage = page || (isAuthenticated ? "dashboard" : "login");
+    if (!isAuthenticated && !PUBLIC_PAGES.includes(targetPage)) {
+      setActivePage("login");
+      if (typeof window !== "undefined") {
+        window.location.hash = "login";
+      }
+      return;
+    }
+
+    setActivePage(targetPage);
+    if (typeof window !== "undefined") {
+      window.location.hash = targetPage;
+    }
   };
 
   const handleToggleRightSidebar = () => {
@@ -306,7 +326,7 @@ function AppContent() {
         user={user}
       />
 
-      <LeftSidebar activeStep="discovery" onStepChange={handleNavigate} />
+      <LeftSidebar activeStep={activePage} onStepChange={handleNavigate} />
 
       {isNotificationOpen && (
         <NotificationOverlay
@@ -351,16 +371,16 @@ function AppContent() {
           />
         )}
         {activePage === "swot-csd" && <SWOTCSDPage onAdvanceStep={() => handleNavigate("personas")} />}
-        {activePage === "personas" && <PersonasPage onAdvanceStep={() => handleNavigate("user-research")} />}
-        {activePage === "user-research" && <UserResearchPage onAdvanceStep={() => handleNavigate("hypothesis-testing")} />}
-        {activePage === "hypothesis-testing" && <HypothesisTestingPage onAdvanceStep={() => handleNavigate("features")} />}
-        {activePage === "features" && <FeaturesPage onAdvanceStep={() => handleNavigate("user-stories-flows")} />}
-        {activePage === "user-stories-flows" && <UserStoriesFlowsPage onAdvanceStep={() => handleNavigate("criteria-metrics")} />}
-        {activePage === "criteria-metrics" && <CriteriaMetricsPage onAdvanceStep={() => handleNavigate("roadmap-backlog")} />}
-        {activePage === "roadmap-backlog" && <RoadmapBacklogPage onAdvanceStep={() => handleNavigate("prototype")} />}
-        {activePage === "prototype" && <PrototypePage onAdvanceStep={() => handleNavigate("prd-final")} />}
-        {activePage === "prd-final" && <PRDFinalPage onAdvanceStep={() => handleNavigate("launch")} />}
-        {activePage === "launch" && <LaunchPage onAdvanceStep={() => handleNavigate("dashboard")} />}
+        {activePage === "personas" && <PersonasPage onAdvanceStep={() => handleNavigate("pesquisa-usuarios")} />}
+        {activePage === "pesquisa-usuarios" && <UserResearchPage onAdvanceStep={() => handleNavigate("validacao-hipoteses")} />}
+        {activePage === "validacao-hipoteses" && <HypothesisTestingPage onAdvanceStep={() => handleNavigate("features-priorizacao")} />}
+        {activePage === "features-priorizacao" && <FeaturesPage onAdvanceStep={() => handleNavigate("user-stories-fluxos")} />}
+        {activePage === "user-stories-fluxos" && <UserStoriesFlowsPage onAdvanceStep={() => handleNavigate("criterios-metricas")} />}
+        {activePage === "criterios-metricas" && <CriteriaMetricsPage onAdvanceStep={() => handleNavigate("roadmap-backlog")} />}
+        {activePage === "roadmap-backlog" && <RoadmapBacklogPage onAdvanceStep={() => handleNavigate("prototipo")} />}
+        {activePage === "prototipo" && <PrototypePage onAdvanceStep={() => handleNavigate("prd-final")} />}
+        {activePage === "prd-final" && <PRDFinalPage onAdvanceStep={() => handleNavigate("lancamento")} />}
+        {activePage === "lancamento" && <LaunchPage onAdvanceStep={() => handleNavigate("dashboard")} />}
       </main>
 
       <RightSidebar
@@ -382,3 +402,5 @@ function App() {
 }
 
 export default App;
+
+
