@@ -35,5 +35,6 @@ COPY --from=backend-build /app/backend ./
 COPY --from=frontend-build /app/frontend/dist ./public
 RUN chown -R node:node /app/backend
 USER node
+CMD ["node", "src/server.js"]
 EXPOSE 3001
 CMD ["node", "src/server.js"]
