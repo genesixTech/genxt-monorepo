@@ -27,6 +27,29 @@ const documents = [
   { name: "Checklist Pós-Lançamento - V1.md" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "message",
+    title: "Checklist do lançamento",
+    items: [
+      { label: "Canais", value: "Email, social, comunidade..." },
+      { label: "Mensagens", value: "O que será comunicado" },
+      { label: "Pós-lançamento", value: "Suporte, monitoramento, métricas" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#cffafe",
+  gradientTo: "#a5f3fc",
+  tagColor: "text-cyan-600",
+  accent: "bg-cyan-500",
+  border: "border-cyan-100",
+  iconBg: "from-cyan-500 to-blue-500",
+  iconColor: "text-white",
+  headerIcon: "message",
+};
+
 const LaunchPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Lançamento"
@@ -36,6 +59,8 @@ const LaunchPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

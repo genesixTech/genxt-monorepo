@@ -27,6 +27,39 @@ const documents = [
   { name: "Registro CSD - V1.md" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "trend",
+    title: "Elementos de SWOT",
+    items: [
+      { label: "Forças", value: "Vantagens internas e diferenciais" },
+      { label: "Fraquezas", value: "Pontos a evoluir para competir melhor" },
+      { label: "Oportunidades", value: "Movimentos externos favoráveis" },
+      { label: "Ameaças", value: "Riscos de mercado ou concorrentes" },
+    ],
+  },
+  {
+    icon: "alert",
+    title: "Matriz CSD",
+    items: [
+      { label: "Certezas", value: "O que já está validado" },
+      { label: "Suposições", value: "Hipóteses a confirmar" },
+      { label: "Dúvidas", value: "Perguntas abertas para investigação" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#fef3c7",
+  gradientTo: "#fde68a",
+  tagColor: "text-amber-600",
+  accent: "bg-amber-500",
+  border: "border-amber-100",
+  iconBg: "from-amber-500 to-orange-500",
+  iconColor: "text-white",
+  headerIcon: "trend",
+};
+
 const SWOTCSDPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="SWOT & CSD"
@@ -36,6 +69,8 @@ const SWOTCSDPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

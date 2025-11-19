@@ -27,6 +27,29 @@ const documents = [
   { name: "Critérios de Sucesso - V1.md" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "trend",
+    title: "Tipos de métricas",
+    items: [
+      { label: "North Star", value: "Indicador que resume o sucesso" },
+      { label: "Leading", value: "Apontam tendência futura" },
+      { label: "Lagging", value: "Confirmam resultado passado" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#eef2ff",
+  gradientTo: "#c7d2fe",
+  tagColor: "text-indigo-600",
+  accent: "bg-indigo-500",
+  border: "border-indigo-100",
+  iconBg: "from-indigo-500 to-purple-500",
+  iconColor: "text-white",
+  headerIcon: "trend",
+};
+
 const CriteriaMetricsPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Critérios & Métricas"
@@ -36,6 +59,8 @@ const CriteriaMetricsPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

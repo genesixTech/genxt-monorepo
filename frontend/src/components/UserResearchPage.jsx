@@ -28,6 +28,29 @@ const documents = [
   { name: "Resumo de Insights - V1.md" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "message",
+    title: "Planejamento de Pesquisa",
+    items: [
+      { label: "Objetivo", value: "Qual aprendizado você busca?" },
+      { label: "Método", value: "Entrevistas, survey, teste..." },
+      { label: "Participantes", value: "Quem representa seu usuário?" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#e0f2fe",
+  gradientTo: "#bae6fd",
+  tagColor: "text-sky-600",
+  accent: "bg-sky-500",
+  border: "border-sky-100",
+  iconBg: "from-sky-500 to-blue-500",
+  iconColor: "text-white",
+  headerIcon: "message",
+};
+
 const UserResearchPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Pesquisa com Usuários"
@@ -37,6 +60,8 @@ const UserResearchPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

@@ -27,6 +27,39 @@ const documents = [
   { name: "Mapa de Jornada - V1.png" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "users",
+    title: "Elementos de uma Persona",
+    items: [
+      { label: "Nome & Foto", value: "Torne a persona real" },
+      { label: "Dados Demográficos", value: "Idade, profissão, renda" },
+      { label: "Objetivos", value: "O que ela quer alcançar" },
+      { label: "Frustrações", value: "Principais dores e bloqueios" },
+    ],
+  },
+  {
+    icon: "target",
+    title: "Jobs to be Done",
+    items: [
+      { label: "Job Funcional", value: "A tarefa prática" },
+      { label: "Job Emocional", value: "Como se sente" },
+      { label: "Job Social", value: "Como é percebido" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#fce7f3",
+  gradientTo: "#f9a8d4",
+  tagColor: "text-pink-600",
+  accent: "bg-pink-500",
+  border: "border-pink-100",
+  iconBg: "from-pink-500 to-rose-500",
+  iconColor: "text-white",
+  headerIcon: "users",
+};
+
 const PersonasPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Personas"
@@ -36,6 +69,8 @@ const PersonasPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

@@ -27,6 +27,29 @@ const documents = [
   { name: "Resumo Executivo - V1.pdf" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "file",
+    title: "Sessões do PRD",
+    items: [
+      { label: "Visão", value: "Contexto, público, objetivo" },
+      { label: "Requisitos", value: "Funcionais + não funcionais" },
+      { label: "Riscos", value: "Premissas, dependências, incertezas" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#ede9fe",
+  gradientTo: "#ddd6fe",
+  tagColor: "text-purple-600",
+  accent: "bg-purple-500",
+  border: "border-purple-100",
+  iconBg: "from-purple-500 to-indigo-500",
+  iconColor: "text-white",
+  headerIcon: "file",
+};
+
 const PRDFinalPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="PRD Final"
@@ -36,6 +59,8 @@ const PRDFinalPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

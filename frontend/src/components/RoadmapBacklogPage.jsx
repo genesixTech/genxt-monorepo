@@ -27,6 +27,29 @@ const documents = [
   { name: "Backlog Mestre - V2.xlsx" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "target",
+    title: "Horizontes",
+    items: [
+      { label: "Curto Prazo", value: "MVP e próximos sprints" },
+      { label: "Médio Prazo", value: "Escala e novas integrações" },
+      { label: "Longo Prazo", value: "Visão estratégica" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#fffbeb",
+  gradientTo: "#fde68a",
+  tagColor: "text-amber-600",
+  accent: "bg-amber-500",
+  border: "border-amber-100",
+  iconBg: "from-amber-500 to-yellow-500",
+  iconColor: "text-white",
+  headerIcon: "target",
+};
+
 const RoadmapBacklogPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Roadmap & Backlog"
@@ -36,6 +59,8 @@ const RoadmapBacklogPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

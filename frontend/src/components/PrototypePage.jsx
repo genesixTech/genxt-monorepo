@@ -27,6 +27,29 @@ const documents = [
   { name: "Relatório de Testes - V1.pdf" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "lightbulb",
+    title: "Checklist do Protótipo",
+    items: [
+      { label: "Fidelidade", value: "Baixa, média ou alta?" },
+      { label: "Ferramenta", value: "Figma, Maze, ProtoPie etc." },
+      { label: "Testes", value: "Quantos usuários testaram?" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#fdf2f8",
+  gradientTo: "#fbcfe8",
+  tagColor: "text-rose-500",
+  accent: "bg-rose-500",
+  border: "border-rose-100",
+  iconBg: "from-rose-500 to-fuchsia-500",
+  iconColor: "text-white",
+  headerIcon: "lightbulb",
+};
+
 const PrototypePage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Protótipo"
@@ -36,6 +59,8 @@ const PrototypePage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

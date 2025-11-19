@@ -27,6 +27,29 @@ const documents = [
   { name: "Mapa de Funcionalidades - V1.md" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "lightbulb",
+    title: "Critérios sugeridos",
+    items: [
+      { label: "Impacto", value: "Quanto contribui para o objetivo?" },
+      { label: "Esforço", value: "Complexidade técnica / custo" },
+      { label: "Urgência", value: "Dependências ou datas críticas" },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#f0fdf4",
+  gradientTo: "#bbf7d0",
+  tagColor: "text-emerald-600",
+  accent: "bg-emerald-500",
+  border: "border-emerald-100",
+  iconBg: "from-emerald-500 to-green-500",
+  iconColor: "text-white",
+  headerIcon: "lightbulb",
+};
+
 const FeaturesPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Funcionalidades e Priorização"
@@ -36,6 +59,8 @@ const FeaturesPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );

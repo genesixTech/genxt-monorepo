@@ -27,6 +27,29 @@ const documents = [
   { name: "Relatório de Experimentos - V1.pdf" },
 ];
 
+const infoBlocks = [
+  {
+    icon: "target",
+    title: "Template de Hipótese",
+    items: [
+      { label: "Suposição", value: "Acreditamos que..." },
+      { label: "Métrica", value: "Será comprovado quando..." },
+      { label: "Experimento", value: "Vamos testar fazendo..." },
+    ],
+  },
+];
+
+const theme = {
+  gradientFrom: "#fef3f2",
+  gradientTo: "#fecdd3",
+  tagColor: "text-rose-600",
+  accent: "bg-rose-500",
+  border: "border-rose-100",
+  iconBg: "from-rose-500 to-red-500",
+  iconColor: "text-white",
+  headerIcon: "target",
+};
+
 const HypothesisTestingPage = ({ onAdvanceStep }) => (
   <AIChatWizard
     title="Teste de Hipóteses"
@@ -36,6 +59,8 @@ const HypothesisTestingPage = ({ onAdvanceStep }) => (
     tasks={tasks}
     insights={insights}
     documents={documents}
+    infoBlocks={infoBlocks}
+    theme={theme}
     onAdvanceStep={onAdvanceStep}
   />
 );
