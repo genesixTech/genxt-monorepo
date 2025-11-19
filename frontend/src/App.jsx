@@ -19,6 +19,17 @@ import SettingsPage from "./components/SettingsPage";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import ForgotPasswordPage from "./components/ForgotPasswordPage";
+import SWOTCSDPage from "./components/SWOTCSDPage";
+import PersonasPage from "./components/PersonasPage";
+import UserResearchPage from "./components/UserResearchPage";
+import HypothesisTestingPage from "./components/HypothesisTestingPage";
+import FeaturesPage from "./components/FeaturesPage";
+import UserStoriesFlowsPage from "./components/UserStoriesFlowsPage";
+import CriteriaMetricsPage from "./components/CriteriaMetricsPage";
+import RoadmapBacklogPage from "./components/RoadmapBacklogPage";
+import PrototypePage from "./components/PrototypePage";
+import PRDFinalPage from "./components/PRDFinalPage";
+import LaunchPage from "./components/LaunchPage";
 
 const stepData = {
   "contexto-problema": {
@@ -37,6 +48,109 @@ const stepData = {
     ],
   },
   discovery: {
+    id: "discovery",
+    title: "Discovery",
+    description: "Exploração do problema e levantamento de hipóteses iniciais",
+    iaMessage:
+      "Hora do Discovery! 🔍\n\nAgora que entendemos o problema, vamos explorar as oportunidades. Quais são as hipóteses iniciais que você tem para a solução? Quais funcionalidades você imagina?",
+    placeholder: "Compartilhe suas hipóteses e ideias de funcionalidades...",
+    tasks: [
+      { id: 1, text: "Levantar hipóteses de solução" },
+      { id: 2, text: "Brainstorm de funcionalidades" },
+      { id: 3, text: "Mapear stakeholders" },
+      { id: 4, text: "Definir escopo inicial" },
+    ],
+  },
+  "swot-csd": {
+    id: "swot-csd",
+    title: "SWOT e CSD",
+    component: SWOTCSDPage,
+    description: "Análise de Forças, Fraquezas, Oportunidades, Ameaças e Matriz CSD (Certezas, Suposições, Dúvidas).",
+    iaMessage: "Análise Estratégica! 📊\n\nVamos consolidar o entendimento do projeto com uma análise SWOT e a Matriz CSD. Quais são os pontos fortes e fracos do seu produto? O que é certeza, suposição e dúvida?",
+    placeholder: "Preencha a análise SWOT e a Matriz CSD...",
+  },
+  personas: {
+    id: "personas",
+    title: "Personas",
+    component: PersonasPage,
+    description: "Criação de Personas para representar os usuários-alvo.",
+    iaMessage: "Conheça seu Usuário! 🧑‍💻\n\nDescreva suas Personas. Quem são eles? Quais são seus objetivos, frustrações e como seu produto se encaixa na vida deles?",
+    placeholder: "Crie suas Personas...",
+  },
+  "user-research": {
+    id: "user-research",
+    title: "Pesquisa de Usuário",
+    component: UserResearchPage,
+    description: "Planejamento e execução da pesquisa de usuário.",
+    iaMessage: "Pesquisa em Ação! 📝\n\nQuais métodos de pesquisa você usará? Quais perguntas você precisa responder para validar suas hipóteses?",
+    placeholder: "Planeje sua pesquisa...",
+  },
+  "hypothesis-testing": {
+    id: "hypothesis-testing",
+    title: "Teste de Hipóteses",
+    component: HypothesisTestingPage,
+    description: "Definição e teste das hipóteses de solução.",
+    iaMessage: "Hora de Testar! ✅\n\nQuais hipóteses você vai testar? Como você vai medir o sucesso ou o fracasso de cada teste?",
+    placeholder: "Defina seus testes de hipóteses...",
+  },
+  features: {
+    id: "features",
+    title: "Features",
+    component: FeaturesPage,
+    description: "Definição e priorização das funcionalidades do produto.",
+    iaMessage: "O que o Produto Faz? ⚙️\n\nListe e priorize as funcionalidades. Use métodos como MoSCoW ou Kano. Quais são as essenciais (Must Have)?",
+    placeholder: "Liste e priorize as funcionalidades...",
+  },
+  "user-stories-flows": {
+    id: "user-stories-flows",
+    title: "User Stories e Fluxos",
+    component: UserStoriesFlowsPage,
+    description: "Criação de User Stories e mapeamento dos fluxos de usuário.",
+    iaMessage: "Como o Usuário Interage? 🗺️\n\nEscreva as User Stories no formato 'Como um [tipo de usuário], eu quero [objetivo], para que [benefício]'. Mapeie os fluxos principais.",
+    placeholder: "Crie as User Stories e os fluxos...",
+  },
+  "criteria-metrics": {
+    id: "criteria-metrics",
+    title: "Critérios e Métricas",
+    component: CriteriaMetricsPage,
+    description: "Definição dos critérios de sucesso e métricas (KPIs).",
+    iaMessage: "O que é Sucesso? 🌟\n\nDefina os critérios de sucesso para o lançamento e as métricas (KPIs) que você usará para medir o desempenho do produto.",
+    placeholder: "Defina critérios e métricas...",
+  },
+  "roadmap-backlog": {
+    id: "roadmap-backlog",
+    title: "Roadmap e Backlog",
+    component: RoadmapBacklogPage,
+    description: "Criação do Roadmap e do Backlog do produto.",
+    iaMessage: "Onde Vamos? 🛣️\n\nOrganize as funcionalidades no Roadmap (curto, médio e longo prazo) e detalhe o Backlog para as próximas iterações.",
+    placeholder: "Crie o Roadmap e o Backlog...",
+  },
+  prototype: {
+    id: "prototype",
+    title: "Protótipo",
+    component: PrototypePage,
+    description: "Criação e teste do protótipo de alta fidelidade.",
+    iaMessage: "Mãos à Obra! 🎨\n\nDescreva o protótipo. Quais são as telas principais? Quais ferramentas você usou? Quais foram os resultados dos testes de usabilidade?",
+    placeholder: "Descreva o protótipo e os testes...",
+  },
+  "prd-final": {
+    id: "prd-final",
+    title: "PRD Final",
+    component: PRDFinalPage,
+    description: "Documento de Requisitos de Produto (PRD) finalizado.",
+    iaMessage: "O Documento Mestre! 📜\n\nRevise e finalize o PRD. Ele deve conter todas as informações necessárias para o time de desenvolvimento.",
+    placeholder: "Finalize o PRD...",
+  },
+  launch: {
+    id: "launch",
+    title: "Lançamento",
+    component: LaunchPage,
+    description: "Plano de lançamento e estratégia Go-to-Market.",
+    iaMessage: "Pronto para o Mundo! 🚀\n\nQual é o seu plano de lançamento? Qual a estratégia de marketing e vendas? Como você vai medir o sucesso pós-lançamento?",
+    placeholder: "Crie o plano de lançamento...",
+  },
+  // Adicionar dados para outras etapas aqui
+};
     id: "discovery",
     title: "Discovery",
     description: "Exploração do problema e levantamento de hipóteses iniciais",
@@ -236,6 +350,17 @@ function AppContent() {
             onAdvanceStep={() => handleNavigate("swot-csd")}
           />
         )}
+        {activePage === "swot-csd" && <SWOTCSDPage onAdvanceStep={() => handleNavigate("personas")} />}
+        {activePage === "personas" && <PersonasPage onAdvanceStep={() => handleNavigate("user-research")} />}
+        {activePage === "user-research" && <UserResearchPage onAdvanceStep={() => handleNavigate("hypothesis-testing")} />}
+        {activePage === "hypothesis-testing" && <HypothesisTestingPage onAdvanceStep={() => handleNavigate("features")} />}
+        {activePage === "features" && <FeaturesPage onAdvanceStep={() => handleNavigate("user-stories-flows")} />}
+        {activePage === "user-stories-flows" && <UserStoriesFlowsPage onAdvanceStep={() => handleNavigate("criteria-metrics")} />}
+        {activePage === "criteria-metrics" && <CriteriaMetricsPage onAdvanceStep={() => handleNavigate("roadmap-backlog")} />}
+        {activePage === "roadmap-backlog" && <RoadmapBacklogPage onAdvanceStep={() => handleNavigate("prototype")} />}
+        {activePage === "prototype" && <PrototypePage onAdvanceStep={() => handleNavigate("prd-final")} />}
+        {activePage === "prd-final" && <PRDFinalPage onAdvanceStep={() => handleNavigate("launch")} />}
+        {activePage === "launch" && <LaunchPage onAdvanceStep={() => handleNavigate("dashboard")} />}
       </main>
 
       <RightSidebar
