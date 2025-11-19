@@ -27,11 +27,13 @@ WORKDIR /app/backend
 COPY backend ./
 
 FROM node:20-bookworm-slim AS runner
-ENV NODE_ENV=production
-WORKDIR /app
-COPY --from=backend-build /app/backend ./backend
-COPY --from=frontend-build /app/frontend/dist ./backend/public
-RUN chown -R node:node /app
+ENV NODE_ENV=production \
+    PORT=3001 \
+    SERVE_FRONTEND=true
+WORKDIR /app/backend
+COPY --from=backend-build /app/backend ./
+COPY --from=frontend-build /app/frontend/dist ./public
+RUN chown -R node:node /app/backend
 USER node
 EXPOSE 3001
-CMD ["node", "backend/src/server.js"]
+CMD ["node", "src/server.js"]
