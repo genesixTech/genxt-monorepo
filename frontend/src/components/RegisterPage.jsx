@@ -118,6 +118,7 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email inválido';
         if (!formData.senha) newErrors.senha = 'Senha é obrigatória';
         else if (formData.senha.length < 8) newErrors.senha = 'Senha deve ter pelo menos 8 caracteres';
+        else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.senha)) newErrors.senha = 'Senha deve conter letra mai�scula, min�scula e n�mero';
         if (formData.senha !== formData.confirmarSenha) newErrors.confirmarSenha = 'Senhas não conferem';
         break;
         
@@ -178,7 +179,17 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
         });
       }
     } catch (error) {
-      setErrors({ general: error?.message || 'Erro ao criar conta. Tente novamente.' });
+      if (error?.data?.details?.length) {
+        const apiErrors = {};
+        error.data.details.forEach(({ field, message }) => {
+          if (!field) return;
+          const normalizedField = field.replace('confirmar_senha', 'confirmarSenha');
+          apiErrors[normalizedField] = message;
+        });
+        setErrors(prev => ({ ...prev, ...apiErrors, general: error?.message }));
+      } else {
+        setErrors({ general: error?.message || 'Erro ao criar conta. Tente novamente.' });
+      }
     } finally {
       setIsLoading(false);
     }
