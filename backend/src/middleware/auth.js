@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
 const { User, UserProfile } = require('../models');
 
-const JWT_SECRET = RESOLVED_JWT_SECRET || process.env.SECRET_KEY;
+const RAW_JWT_SECRET = process.env.JWT_SECRET || process.env.SECRET_KEY;
+const RESOLVED_JWT_SECRET = RAW_JWT_SECRET || 'genesix_dev_secret';
 
-if (!JWT_SECRET) {
+if (!RAW_JWT_SECRET) {
   console.warn('JWT secret key is not set. Using insecure default. Set SECRET_KEY or JWT_SECRET in the environment for production.');
 }
-
-const RESOLVED_JWT_SECRET = JWT_SECRET || 'genesix_dev_secret';
 
 // Middleware para verificar token JWT
 const authenticateToken = async (req, res, next) => {
