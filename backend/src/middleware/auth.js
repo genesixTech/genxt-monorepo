@@ -1,6 +1,14 @@
 const jwt = require('jsonwebtoken');
 const { User, UserProfile } = require('../models');
 
+const JWT_SECRET = RESOLVED_JWT_SECRET || process.env.SECRET_KEY;
+
+if (!JWT_SECRET) {
+  console.warn('JWT secret key is not set. Using insecure default. Set SECRET_KEY or JWT_SECRET in the environment for production.');
+}
+
+const RESOLVED_JWT_SECRET = JWT_SECRET || 'genesix_dev_secret';
+
 // Middleware para verificar token JWT
 const authenticateToken = async (req, res, next) => {
   try {
@@ -15,7 +23,7 @@ const authenticateToken = async (req, res, next) => {
     }
 
     // Verificar e decodificar token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, RESOLVED_JWT_SECRET);
     
     // Buscar usuário no banco
     const user = await User.findByPk(decoded.userId, {
@@ -81,7 +89,7 @@ const optionalAuth = async (req, res, next) => {
       return next();
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, RESOLVED_JWT_SECRET);
     const user = await User.findByPk(decoded.userId, {
       include: [
         {
@@ -181,7 +189,7 @@ const getMissingProfileFields = (profile) => {
 const generateToken = (userId, expiresIn = process.env.JWT_EXPIRES_IN || '7d') => {
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET,
+    RESOLVED_JWT_SECRET,
     { expiresIn }
   );
 };
@@ -190,7 +198,7 @@ const generateToken = (userId, expiresIn = process.env.JWT_EXPIRES_IN || '7d') =
 const generateRefreshToken = (userId) => {
   return jwt.sign(
     { userId, type: 'refresh' },
-    process.env.JWT_SECRET,
+    RESOLVED_JWT_SECRET,
     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
   );
 };
@@ -198,7 +206,7 @@ const generateRefreshToken = (userId) => {
 // Verificar refresh token
 const verifyRefreshToken = (token) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, RESOLVED_JWT_SECRET);
     if (decoded.type !== 'refresh') {
       throw new Error('Token inválido');
     }
@@ -218,3 +226,4 @@ module.exports = {
   verifyRefreshToken,
   getMissingProfileFields,
 };
+
