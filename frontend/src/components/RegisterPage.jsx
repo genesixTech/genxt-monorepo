@@ -164,6 +164,7 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
           nome: formData.nome,
           email: formData.email,
           senha: formData.senha,
+          confirmar_senha: formData.confirmarSenha,
           perfil: {
             area_atuacao: formData.areaAtuacao,
             tamanho_empresa: formData.tamanhoEmpresa,

@@ -276,6 +276,7 @@ export const authService = {
       nome: userData.nome,
       email: userData.email,
       senha: userData.senha,
+      confirmar_senha: userData.confirmar_senha || userData.senha,
     });
     
     if (response.data.token) {
