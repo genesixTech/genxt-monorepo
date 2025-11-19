@@ -159,21 +159,25 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
     setIsLoading(true);
     
     try {
-      // Simular chamada para API
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Aqui você faria a chamada real para o backend
-      // const response = await fetch('/api/auth/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      
-      onRegister && onRegister();
-      onNavigate('dashboard');
-      
+      if (onRegister) {
+        await onRegister({
+          nome: formData.nome,
+          email: formData.email,
+          senha: formData.senha,
+          perfil: {
+            area_atuacao: formData.areaAtuacao,
+            tamanho_empresa: formData.tamanhoEmpresa,
+            nivel_conhecimento: formData.nivelConhecimento,
+            objetivo_principal: formData.objetivoPrincipal,
+            origem_conhecimento: formData.origemConhecimento,
+            whatsapp: formData.whatsapp,
+          },
+          aceitaTermos: formData.aceitaTermos,
+          aceitaMarketing: formData.aceitaMarketing,
+        });
+      }
     } catch (error) {
-      setErrors({ general: 'Erro ao criar conta. Tente novamente.' });
+      setErrors({ general: error?.message || 'Erro ao criar conta. Tente novamente.' });
     } finally {
       setIsLoading(false);
     }
