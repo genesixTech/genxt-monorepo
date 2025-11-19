@@ -16,6 +16,9 @@ const PORT = process.env.PORT || 3001;
 const FRONTEND_DIST_PATH = path.join(__dirname, '..', 'public');
 const SHOULD_SERVE_FRONTEND = process.env.SERVE_FRONTEND !== 'false';
 
+// Confiar nos proxies (necessário para rate limiting e logs corretos)
+app.set('trust proxy', 1);
+
 // Middleware de segurança
 app.use(helmet());
 
