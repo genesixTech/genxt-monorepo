@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const passport = require('passport');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 // Inicializar banco de dados
@@ -11,6 +13,8 @@ const { testConnection, syncDatabase } = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const FRONTEND_DIST_PATH = path.join(__dirname, '..', 'public');
+const SHOULD_SERVE_FRONTEND = process.env.SERVE_FRONTEND !== 'false';
 
 // Middleware de segurança
 app.use(helmet());
@@ -57,6 +61,18 @@ app.use('/api/documents', require('./routes/documents'));
 app.use('/api/collaborators', require('./routes/collaborators'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/analytics', require('./routes/analytics'));
+
+// Servir frontend estático quando disponível
+if (SHOULD_SERVE_FRONTEND && fs.existsSync(FRONTEND_DIST_PATH)) {
+  app.use(express.static(FRONTEND_DIST_PATH));
+
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) {
+      return next();
+    }
+    return res.sendFile(path.join(FRONTEND_DIST_PATH, 'index.html'));
+  });
+}
 
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
