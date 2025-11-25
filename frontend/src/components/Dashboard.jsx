@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { analyticsService, utils } from "@/services/api";
 import {
   FileText,
   CheckCircle,
@@ -19,208 +20,151 @@ import {
   Target,
   Palette,
   Rocket,
-  BookOpen,
-  Settings,
 } from "lucide-react";
 
+const STEP_CONFIG = {
+  "contexto-problema": {
+    title: "Contexto e Problema",
+    description: "Diagnostico inicial e oportunidade.",
+    icon: Search,
+    iconColor: "bg-purple-100 text-purple-600",
+  },
+  discovery: {
+    title: "Discovery",
+    description: "Exploracao, benchmarks e hipoteses iniciais.",
+    icon: Lightbulb,
+    iconColor: "bg-blue-100 text-blue-600",
+  },
+  "swot-csd": {
+    title: "SWOT & CSD",
+    description: "Analise estrategica e matriz CSD.",
+    icon: BarChart3,
+    iconColor: "bg-green-100 text-green-600",
+  },
+  personas: {
+    title: "Personas",
+    description: "Perfis e dores do publico alvo.",
+    icon: Users,
+    iconColor: "bg-orange-100 text-orange-600",
+  },
+  "pesquisa-usuarios": {
+    title: "Pesquisa com Usuarios",
+    description: "Coleta e sintese de entrevistas.",
+    icon: MessageSquare,
+    iconColor: "bg-pink-100 text-pink-600",
+  },
+  "validacao-hipoteses": {
+    title: "Validacao de Hipoteses",
+    description: "Testes e aprendizados priorizados.",
+    icon: CheckSquare,
+    iconColor: "bg-indigo-100 text-indigo-600",
+  },
+  "features-priorizacao": {
+    title: "Features & Priorizacao",
+    description: "Organizacao das funcionalidades do produto.",
+    icon: Layers,
+    iconColor: "bg-yellow-100 text-yellow-600",
+  },
+  "user-stories-fluxos": {
+    title: "User Stories & Fluxos",
+    description: "Mapeamento dos fluxos e historias.",
+    icon: GitBranch,
+    iconColor: "bg-teal-100 text-teal-600",
+  },
+  "criterios-metricas": {
+    title: "Criterios e Metricas",
+    description: "KPIs e indicadores para a entrega.",
+    icon: Target,
+    iconColor: "bg-cyan-100 text-cyan-600",
+  },
+  "roadmap-backlog": {
+    title: "Roadmap & Backlog",
+    description: "Planejamento das entregas e iteracoes.",
+    icon: Calendar,
+    iconColor: "bg-red-100 text-red-600",
+  },
+  prototipo: {
+    title: "Prototipo",
+    description: "Conceitos validados com usuarios.",
+    icon: Palette,
+    iconColor: "bg-lime-100 text-lime-600",
+  },
+  "prd-final": {
+    title: "PRD Final",
+    description: "Documento final de requisitos.",
+    icon: FileText,
+    iconColor: "bg-gray-100 text-gray-600",
+  },
+  lancamento: {
+    title: "Lancamento",
+    description: "Go-to-market e acompanhamento.",
+    icon: Rocket,
+    iconColor: "bg-fuchsia-100 text-fuchsia-600",
+  },
+};
+
+const KPI_CONFIG = [
+  { key: "total_documents", title: "Documentos", icon: FileText, color: "text-blue-600" },
+  { key: "approved_documents", title: "Docs aprovados", icon: CheckCircle, color: "text-green-600" },
+  { key: "total_projects", title: "Projetos", icon: Layers, color: "text-orange-600" },
+  { key: "total_collaborations", title: "Colaboracoes", icon: Users, color: "text-purple-600" },
+];
+
 const Dashboard = ({ onNavigate, onOpenWizard }) => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [metrics, setMetrics] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const kpis = [
-    {
-      id: 1,
-      title: "Relatórios Gerados",
-      value: 12,
-      icon: FileText,
-      color: "text-blue-600",
-    },
-    {
-      id: 2,
-      title: "Validações Concluídas",
-      value: 8,
-      icon: CheckCircle,
-      color: "text-green-600",
-    },
-    {
-      id: 3,
-      title: "Tempo até MVP",
-      value: "14 dias",
-      icon: Calendar,
-      color: "text-orange-600",
-    },
-    {
-      id: 4,
-      title: "Docs da IA",
-      value: 15,
-      icon: Lightbulb,
-      color: "text-purple-600",
-    },
-  ];
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await analyticsService.getDashboard();
+        setMetrics(response.data);
+      } catch (err) {
+        setError(utils?.formatApiError ? utils.formatApiError(err) : err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const steps = [
-    {
-      id: "contexto-problema",
-      title: "Contexto e Problema",
-      description:
-        "Identificação inicial do problema e da oportunidade de mercado.",
-      icon: Search,
-      status: "completed",
-      progress: 100,
-      time: "1-2 dias",
-      lastActivity: "Análise de problema concluída",
-      tasks: "8/8 tarefas",
-      iconColor: "bg-purple-100 text-purple-600",
-    },
-    {
-      id: "discovery",
-      title: "Analisando o Mercado",
-      description:
-        "Exploração do problema, análise do mercado e tendências, benchmarks",
-      icon: Lightbulb,
-      status: "in-progress",
-      progress: 65,
-      time: "2-3 dias",
-      lastActivity: "Pesquisa de mercado em andamento",
-      tasks: "5/8 tarefas",
-      iconColor: "bg-blue-100 text-blue-600",
-    },
-    {
-      id: "swot-csd",
-      title: "SWOT & CSD",
-      description: "Construção da matriz SWOT e CSD para análise estratégica",
-      icon: BarChart3,
-      status: "completed",
-      progress: 100,
-      time: "1-2 dias",
-      lastActivity: "Matriz SWOT finalizada",
-      tasks: "6/6 tarefas",
-      iconColor: "bg-green-100 text-green-600",
-    },
-    {
-      id: "personas",
-      title: "Personas",
-      description:
-        "Definição de perfis de usuários-alvo e suas características",
-      icon: Users,
-      status: "pending",
-      progress: 0,
-      time: "3-5 dias",
-      lastActivity: "Aguardando início",
-      tasks: "0/4 tarefas",
-      iconColor: "bg-orange-100 text-orange-600",
-    },
-    {
-      id: "pesquisa-usuarios",
-      title: "Pesquisa com Usuários",
-      description: "Criação, aplicação e análise de pesquisas com usuários",
-      icon: MessageSquare,
-      status: "pending",
-      progress: 0,
-      time: "3-5 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/7 tarefas",
-      iconColor: "bg-pink-100 text-pink-600",
-    },
-    {
-      id: "validacao-hipoteses",
-      title: "Validação de Hipóteses",
-      description:
-        "Teste das hipóteses levantadas com base em dados e pesquisas",
-      icon: CheckSquare,
-      status: "pending",
-      progress: 0,
-      time: "1-2 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/5 tarefas",
-      iconColor: "bg-indigo-100 text-indigo-600",
-    },
-    {
-      id: "features-priorizacao",
-      title: "Features & Priorização",
-      description: "Definição e priorização das funcionalidades do produto",
-      icon: Layers,
-      status: "pending",
-      progress: 0,
-      time: "2-4 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/6 tarefas",
-      iconColor: "bg-yellow-100 text-yellow-600",
-    },
-    {
-      id: "user-stories-fluxos",
-      title: "User Stories & Fluxos",
-      description: "Criação de histórias de usuário e mapeamento de fluxos",
-      icon: GitBranch,
-      status: "pending",
-      progress: 0,
-      time: "3-5 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/7 tarefas",
-      iconColor: "bg-teal-100 text-teal-600",
-    },
-    {
-      id: "criterios-metricas",
-      title: "Critérios e Métricas",
-      description:
-        "Definição de critérios de sucesso e métricas de acompanhamento",
-      icon: Target,
-      status: "pending",
-      progress: 0,
-      time: "1-2 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/3 tarefas",
-      iconColor: "bg-cyan-100 text-cyan-600",
-    },
-    {
-      id: "roadmap-backlog",
-      title: "Roadmap & Backlog",
-      description:
-        "Planejamento temporal e organização do backlog de desenvolvimento",
-      icon: Calendar,
-      status: "pending",
-      progress: 0,
-      time: "2-3 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/5 tarefas",
-      iconColor: "bg-red-100 text-red-600",
-    },
-    {
-      id: "prototipo",
-      title: "Protótipo",
-      description: "Criação de protótipos e wireframes do produto",
-      icon: Palette,
-      status: "pending",
-      progress: 0,
-      time: "3-5 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/4 tarefas",
-      iconColor: "bg-lime-100 text-lime-600",
-    },
-    {
-      id: "prd-final",
-      title: "PRD Final",
-      description: "Documento final de requisitos do produto",
+    fetchMetrics();
+  }, []);
+
+  const overview = metrics?.overview || {};
+  const documentsByStep = useMemo(
+    () => (metrics?.charts?.documents_by_step || []).map((doc) => ({
+      etapa: doc.etapa,
+      count: Number(doc.count || doc.Count || 0),
+    })),
+    [metrics],
+  );
+
+  const totalDocuments = overview.total_documents || 0;
+
+  const stepCards = documentsByStep.map((item) => {
+    const meta = STEP_CONFIG[item.etapa] || {
+      title: item.etapa,
+      description: "Etapa cadastrada",
       icon: FileText,
-      status: "pending",
-      progress: 0,
-      time: "1-2 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/2 tarefas",
       iconColor: "bg-gray-100 text-gray-600",
-    },
-    {
-      id: "lancamento",
-      title: "Lançamento",
-      description: "Estratégia e execução do lançamento do produto",
-      icon: Rocket,
-      status: "pending",
-      progress: 0,
-      time: "1-2 dias",
-      lastActivity: "Não iniciado",
-      tasks: "0/3 tarefas",
-      iconColor: "bg-fuchsia-100 text-fuchsia-600",
-    },
-  ];
+    };
+
+    return {
+      id: item.etapa,
+      title: meta.title,
+      description: meta.description,
+      icon: meta.icon,
+      iconColor: meta.iconColor,
+      progress: totalDocuments > 0 ? Math.round((item.count / totalDocuments) * 100) : 0,
+      tasks: `${item.count} documento(s)`,
+      lastActivity: `Ultima contagem: ${item.count}`,
+    };
+  });
+
+  const kpis = KPI_CONFIG.map((kpi) => {
+    const value = overview[kpi.key] ?? 0;
+    return { ...kpi, value };
+  });
 
   const getStatusBadgeColor = (status) => {
     switch (status) {
@@ -244,6 +188,126 @@ const Dashboard = ({ onNavigate, onOpenWizard }) => {
     }
   };
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center text-gray-600">Carregando metricas em tempo real...</div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+          {error}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {kpis.map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <Card
+                key={kpi.key}
+                className="border-none bg-white p-4 flex flex-col items-center justify-center text-center"
+              >
+                <Icon className={`h-8 w-8 mb-2 ${kpi.color}`} />
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {kpi.value}
+                </div>
+                <CardTitle className="text-sm font-medium text-gray-700">
+                  {kpi.title}
+                </CardTitle>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="mb-6 cursor-context-menu">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Progresso por etapa</h2>
+              <p className="text-sm text-gray-500">
+                Distribuicao dos documentos registrados no backend
+              </p>
+            </div>
+            <Badge className="bg-gray-100 text-gray-700">
+              {totalDocuments} documento(s) mapeado(s)
+            </Badge>
+          </div>
+
+          {stepCards.length === 0 ? (
+            <Card className="p-6 text-center text-gray-600 bg-white shadow-sm">
+              Nenhum documento encontrado. Gere ou importe seus documentos para visualizar o progresso.
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {stepCards.map((step) => {
+                const Icon = step.icon;
+                const status =
+                  step.progress === 0
+                    ? "pending"
+                    : step.progress >= 100
+                      ? "completed"
+                      : "in-progress";
+
+                return (
+                  <Card
+                    key={step.id}
+                    className="shadow-sm hover:shadow-md transition-shadow duration-200"
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start space-x-3">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center ${step.iconColor}`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <h3 className="mb-2 text-base font-semibold text-gray-900">
+                              {step.title}
+                            </h3>
+                            <Badge className={getStatusBadgeColor(status)}>
+                              {status === "completed"
+                                ? "Concluido"
+                                : status === "in-progress"
+                                  ? "Em andamento"
+                                  : "Pendente"}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4">
+                            {step.description}
+                          </p>
+                          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                            <span>{step.tasks}</span>
+                            <span>{overview.average_progress ? `${overview.average_progress}% medio` : "Sem media"}</span>
+                          </div>
+                          <Progress
+                            value={step.progress}
+                            className="h-1.5"
+                            indicatorColor={getProgressColor(status)}
+                          />
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {step.lastActivity}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="flex-1 p-4">
       <div className="flex items-center justify-between mb-4">
@@ -261,95 +325,19 @@ const Dashboard = ({ onNavigate, onOpenWizard }) => {
             onClick={onOpenWizard}
           >
             <Wand2 className="w-4 h-4 mr-2" />
-            Novo Tarefa
+            Nova tarefa
           </Button>
           <Button
             className="bg-blue-600 text-white shadow-lg hover:bg-blue-700 h-9 px-4 text-sm"
             onClick={() => onNavigate?.("discovery")}
           >
             <Lightbulb className="w-4 h-4 mr-2" />
-            Continuar Fluxo: Discovery
+            Continuar fluxo: Discovery
           </Button>
         </div>
       </div>
 
-      {/* KPIs Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <Card
-              key={kpi.id}
-              className="border-none bg-white p-4 flex flex-col items-center justify-center text-center"
-            >
-              <Icon className={`h-8 w-8 mb-2 ${kpi.color}`} />
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {kpi.value}
-              </div>
-              <CardTitle className="text-sm font-medium text-gray-700">
-                {kpi.title}
-              </CardTitle>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Project Progress Section */}
-      <div className="mb-6 cursor-context-menu">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">
-          Progresso do Projeto
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {steps.map((step) => {
-            const Icon = step.icon;
-            return (
-              <Card
-                key={step.id}
-                className="shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${step.iconColor}`}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <h3 className="mb-2 text-base font-semibold text-gray-900">
-                          {step.title}
-                        </h3>
-                        <Badge className={getStatusBadgeColor(step.status)}>
-                          {step.status === "completed"
-                            ? "Concluído"
-                            : step.status === "in-progress"
-                              ? "Em andamento"
-                              : "Pendente"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-4">
-                        {step.description}
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                        <span>{step.tasks}</span>
-                        <span>{step.time}</span>
-                      </div>
-                      <Progress
-                        value={step.progress}
-                        className="h-1.5"
-                        indicatorColor={getProgressColor(step.status)}
-                      />
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Última atividade: {step.lastActivity}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
+      {renderContent()}
     </div>
   );
 };

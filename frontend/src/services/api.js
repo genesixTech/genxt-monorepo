@@ -1,5 +1,8 @@
 // Configuração base da API
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+  (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
+  '/api';
 
 // Classe para gerenciar tokens
 class TokenManager {
@@ -493,6 +496,14 @@ export const settingsService = {
   },
 };
 
+
+export const analyticsService = {
+  // M�tricas do dashboard
+  async getDashboard(params = {}) {
+    return api.get('/analytics/dashboard', params);
+  },
+};
+
 // Utilitários
 export const utils = {
   // Formatar erros da API para exibição
@@ -520,3 +531,4 @@ export const utils = {
 // Exportações principais
 export { api, ApiError, TokenManager };
 export default api;
+

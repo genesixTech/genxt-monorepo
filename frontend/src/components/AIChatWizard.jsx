@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,7 +13,6 @@ import {
   Send,
   Target,
   TrendingUp,
-  Upload,
   Users,
 } from "lucide-react";
 
@@ -27,42 +26,6 @@ const ICON_MAP = {
   file: FileText,
 };
 
-const DEFAULT_TASKS = [
-  { id: 1, text: "Coletar informações-chave da etapa" },
-  { id: 2, text: "Compartilhar contexto com a IA" },
-  { id: 3, text: "Validar insights gerados" },
-  { id: 4, text: "Salvar documento da etapa" },
-];
-
-const DEFAULT_INSIGHTS = [
-  {
-    icon: "trend",
-    title: "Foco em Validação",
-    description:
-      "A IA sugere validar os pontos levantados com usuários reais antes de avançar para a próxima etapa.",
-  },
-  {
-    icon: "lightbulb",
-    title: "Oportunidade de Inovação",
-    description:
-      "Integre dados qualitativos e quantitativos para gerar hipóteses mais robustas e alinhadas ao mercado.",
-  },
-];
-
-const DEFAULT_DOCUMENTS = [
-  { name: "Documento Base - V1.md" },
-  { name: "Insights da Etapa - V1.pdf" },
-];
-
-const buildTaskList = (tasks) => {
-  const baseTasks = tasks.length ? tasks : DEFAULT_TASKS;
-  return baseTasks.map((task, index) => ({
-    id: task.id ?? index + 1,
-    text: task.text ?? task,
-    completed: false,
-  }));
-};
-
 const DEFAULT_THEME = {
   gradientFrom: "#ede9fe",
   gradientTo: "#f5d0fe",
@@ -74,26 +37,37 @@ const DEFAULT_THEME = {
   headerIcon: "users",
 };
 
+const normalizeTasks = (tasks = []) =>
+  tasks.map((task, index) => ({
+    id: task.id ?? index + 1,
+    text: task.text ?? task,
+    completed: Boolean(task.completed),
+  }));
+
 const AIChatWizard = ({
   title,
   description,
   placeholder = "Descreva os pontos que a IA precisa considerar...",
   iaMessage = "Compartilhe detalhes sobre esta etapa para que eu possa gerar um documento completo.",
   tasks = [],
-  insights,
-  documents,
+  insights = [],
+  documents = [],
   infoBlocks = [],
   theme = DEFAULT_THEME,
   onAdvanceStep,
+  onGenerateDocument,
+  isLoadingDocuments = false,
+  documentsError = null,
+  projectId,
 }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [generatedDocument, setGeneratedDocument] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [taskList, setTaskList] = useState(() => buildTaskList(tasks));
+  const [taskList, setTaskList] = useState(() => normalizeTasks(tasks));
 
   useEffect(() => {
-    setTaskList(buildTaskList(tasks));
+    setTaskList(normalizeTasks(tasks));
   }, [tasks, title]);
 
   useEffect(() => {
@@ -109,70 +83,53 @@ const AIChatWizard = ({
     setInputMessage("");
   }, [iaMessage, title]);
 
-  const resolvedInsights = useMemo(() => {
-    if (insights?.length) return insights;
-    return DEFAULT_INSIGHTS;
-  }, [insights]);
+  const hasInsights = insights && insights.length > 0;
+  const hasInfoBlocks = infoBlocks && infoBlocks.length > 0;
 
-  const resolvedDocuments = useMemo(() => {
-    if (documents?.length) return documents;
-    return DEFAULT_DOCUMENTS;
-  }, [documents]);
-
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    const userInput = inputMessage.trim();
     const newMessage = {
       id: Date.now(),
       sender: "user",
-      text: inputMessage.trim(),
+      text: userInput,
       timestamp: new Date().toLocaleTimeString(),
     };
 
     setMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
-    setIsGenerating(true);
 
-    setTimeout(() => {
-      const iaResponse = {
+    if (!onGenerateDocument) return;
+
+    setIsGenerating(true);
+    try {
+      await onGenerateDocument(userInput);
+      const confirmation = {
         id: Date.now() + 1,
         sender: "IA",
-        text: `Perfeito! Analisei suas informações sobre ${title}. Vou gerar um documento detalhado...`,
+        text: "Documento salvo no backend. Ajuste ou envie novos pontos para gerar outra versao.",
         timestamp: new Date().toLocaleTimeString(),
       };
-      setMessages((prev) => [...prev, iaResponse]);
-
-      setTimeout(() => {
-        setGeneratedDocument({
-          title: `Documento de ${title}`,
-          content: `## Documento de ${title}\n\nBaseado nas suas informações mais recentes:\n\n**Input do Usuário:** ${newMessage.text}\n\n**Análise da IA:**\n\n*   Documento gerado automaticamente para a etapa **${title}**.\n*   Consolida insights, próximos passos e recomendações estratégicas.\n*   Pronto para revisão, ajustes e versionamento.\n\n**Próximos Passos sugeridos:**\n\n1.  Revisar o conteúdo com stakeholders.\n2.  Registrar feedbacks relevantes.\n3.  Avançar para a próxima etapa do fluxo.`,
-          status: "pending",
-        });
-        setIsGenerating(false);
-      }, 2000);
-    }, 1500);
-  };
-
-  const handleApproveDocument = () => {
-    setGeneratedDocument((prev) => ({ ...prev, status: "approved" }));
-    alert(`Documento de ${title} aprovado!`);
-  };
-
-  const handleEditDocument = () => {
-    alert("Funcionalidade de edição em desenvolvimento!");
-  };
-
-  const handleRejectDocument = () => {
-    setGeneratedDocument(null);
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now() + 2,
-        sender: "IA",
-        text: "Entendido! Compartilhe novos detalhes ou ajustes para que eu gere uma nova versão.",
-        timestamp: new Date().toLocaleTimeString(),
-      },
-    ]);
+      setMessages((prev) => [...prev, confirmation]);
+      setGeneratedDocument({
+        title: `Documento de ${title}`,
+        content: userInput,
+        status: "saved",
+      });
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 2,
+          sender: "IA",
+          text: error?.message || "Nao foi possivel salvar o documento.",
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleTaskToggle = (taskId) => {
@@ -183,7 +140,7 @@ const AIChatWizard = ({
     );
   };
 
-  const headerIcon = ICON_MAP[theme.headerIcon] || ICON_MAP.users;
+  const HeaderIcon = ICON_MAP[theme.headerIcon] || ICON_MAP.users;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 pb-8">
@@ -197,152 +154,92 @@ const AIChatWizard = ({
               {title}
             </h1>
             <p className="text-gray-600 mt-1 max-w-2xl">{description}</p>
+            {projectId ? (
+              <p className="text-xs text-green-700 mt-1">Projeto ativo: {projectId}</p>
+            ) : (
+              <p className="text-xs text-amber-700 mt-1">Informe o projeto para salvar documentos.</p>
+            )}
           </div>
-          {onAdvanceStep && (
-            <Button
-              onClick={onAdvanceStep}
-              className="bg-blue-600 text-white shadow-lg hover:bg-blue-700 h-10 px-5 text-sm"
-            >
-              Avançar etapa
-            </Button>
-          )}
+          <div className="flex items-center space-x-2">
+            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${theme.iconBg} flex items-center justify-center`}>
+              {HeaderIcon && <HeaderIcon className={`w-6 h-6 ${theme.iconColor}`} />}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <Card className="shadow-lg border border-transparent">
-              <CardHeader className="pb-3 flex flex-col gap-2">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white"
-                  style={{
-                    background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})`,
-                  }}
-                >
-                  {headerIcon && (
-                    <headerIcon className="w-6 h-6 text-white" />
-                  )}
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-semibold text-gray-900">
-                    Conversa com a IA
-                  </CardTitle>
-                  <p className="text-sm text-gray-500">
-                    Use o assistente para gerar artefatos completos desta etapa.
-                  </p>
-                </div>
+            <Card className="shadow-sm border-none">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-semibold">
+                  Chat com a IA
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div
-                  className="p-4 rounded-2xl text-sm shadow-sm"
-                  style={{
-                    background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})`,
-                  }}
-                >
-                  <p className="font-semibold text-gray-900 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    IA GenesiX
-                  </p>
-                  <p className="text-gray-800 mt-1">{iaMessage}</p>
-                </div>
-                <div className="h-64 overflow-y-auto pr-2 space-y-3">
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                      className={`p-3 rounded-2xl border ${
+                        message.sender === "IA"
+                          ? "bg-purple-50 border-purple-100"
+                          : "bg-white border-gray-100"
+                      }`}
                     >
-                      <div
-                        className={`max-w-md rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                          message.sender === "user"
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-white text-gray-800 border border-gray-100 rounded-bl-none"
-                        }`}
-                      >
-                        <p className="font-medium mb-1">
-                          {message.sender === "user" ? "Você" : "IA GenesiX"}
-                        </p>
-                        <p className="whitespace-pre-wrap">{message.text}</p>
-                        <span className="text-xs opacity-70 block mt-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-gray-700">
+                          {message.sender === "IA" ? "IA GenesiX" : "Voce"}
+                        </span>
+                        <span className="text-[11px] text-gray-500">
                           {message.timestamp}
                         </span>
                       </div>
+                      <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                        {message.text}
+                      </p>
                     </div>
                   ))}
-
-                  {isGenerating && (
-                    <div className="flex justify-start">
-                      <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-500 flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                        <span>Gerando novo documento...</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                <div className="flex items-center space-x-2 border-t border-gray-200 pt-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9">
-                    <Upload className="w-4 h-4" />
-                  </Button>
-                  <Textarea
-                    placeholder={placeholder}
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    className="flex-1 resize-none text-sm h-10 min-h-[40px]"
-                    rows={1}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    size="icon"
-                    className="bg-purple-500 hover:bg-purple-600 h-9 w-9"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Textarea
+                      placeholder={placeholder}
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      className="min-h-28 pr-20"
+                      disabled={isGenerating}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      className="absolute right-2 bottom-2 h-10"
+                      disabled={isGenerating}
+                    >
+                      {isGenerating ? (
+                        <RefreshCcw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    A mensagem sera enviada para o backend. Cada envio salva um rascunho para esta etapa.
+                  </p>
                 </div>
               </CardContent>
             </Card>
 
             {generatedDocument && (
-              <Card className="shadow-lg border-green-500">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-green-700">
-                    Documento Gerado pela IA
+              <Card className="shadow-sm border border-green-100 bg-green-50/60">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-green-800">
+                    <CheckCircle className="w-5 h-5" /> Documento salvo
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                <CardContent className="space-y-2 text-sm text-gray-800">
+                  <p className="font-semibold">{generatedDocument.title}</p>
+                  <div className="p-3 bg-white rounded-lg border border-green-100 whitespace-pre-wrap">
                     {generatedDocument.content}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      onClick={handleApproveDocument}
-                      className="bg-green-500 hover:bg-green-600 text-white h-9 px-4 text-sm"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Aprovar
-                    </Button>
-                    <Button
-                      onClick={handleEditDocument}
-                      variant="outline"
-                      className="h-9 px-4 text-sm"
-                    >
-                      <span className="flex items-center">
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Editar
-                      </span>
-                    </Button>
-                    <Button
-                      onClick={handleRejectDocument}
-                      variant="destructive"
-                      className="h-9 px-4 text-sm"
-                    >
-                      <RefreshCcw className="w-4 h-4 mr-2" />
-                      Rejeitar e refazer
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -369,7 +266,9 @@ const AIChatWizard = ({
                     className="rounded-full h-2 transition-all"
                     style={{
                       background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})`,
-                      width: `${Math.round((taskList.filter((t) => t.completed).length / taskList.length) * 100) || 0}%`,
+                      width: `${
+                        Math.round((taskList.filter((t) => t.completed).length / (taskList.length || 1)) * 100) || 0
+                      }%`,
                     }}
                   />
                 </div>
@@ -404,7 +303,7 @@ const AIChatWizard = ({
               </CardContent>
             </Card>
 
-            {infoBlocks.length > 0 && (
+            {hasInfoBlocks && (
               <div className="grid grid-cols-1 gap-3">
                 {infoBlocks.map((block, index) => {
                   const Icon = ICON_MAP[block.icon] || ICON_MAP.lightbulb;
@@ -442,69 +341,73 @@ const AIChatWizard = ({
             <Card className="shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-semibold">
-                  Insights da IA
+                  Insights
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {resolvedInsights.map((insight, index) => {
-                  const Icon =
-                    ICON_MAP[insight.icon] || ICON_MAP.lightbulb;
-                  return (
-                    <div
-                      key={`${insight.title}-${index}`}
-                      className="p-3 bg-gray-50 rounded-lg border border-gray-100"
-                    >
-                      <div className="flex items-start space-x-2">
-                        <Icon className="w-4 h-4 mt-0.5 text-purple-600" />
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-0.5">
-                            {insight.title}
-                          </h4>
-                          <p className="text-xs text-gray-600">
-                            {insight.description}
-                          </p>
+                {hasInsights ? (
+                  insights.map((insight, index) => {
+                    const Icon = ICON_MAP[insight.icon] || ICON_MAP.lightbulb;
+                    return (
+                      <div
+                        key={`${insight.title}-${index}`}
+                        className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+                      >
+                        <div className="flex items-start space-x-2">
+                          <Icon className="w-4 h-4 mt-0.5 text-purple-600" />
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-900 mb-0.5">
+                              {insight.title}
+                            </h4>
+                            <p className="text-xs text-gray-600">
+                              {insight.description}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-gray-500">Nenhum insight registrado para esta etapa.</p>
+                )}
               </CardContent>
             </Card>
 
             <Card className="shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-semibold">
-                  Versionamento de Documentos
+                  Documentos da etapa
                 </CardTitle>
+                {documentsError && (
+                  <p className="text-xs text-red-600">{documentsError}</p>
+                )}
               </CardHeader>
               <CardContent className="space-y-2">
-                {resolvedDocuments.map((doc, index) => (
-                  <div
-                    key={`${doc.name}-${index}`}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <FileText className="w-4 h-4 text-gray-600" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {doc.name}
-                        </p>
-                        {doc.version && (
-                          <p className="text-xs text-gray-500">
-                            {doc.version}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
+                {isLoadingDocuments ? (
+                  <p className="text-sm text-gray-500">Carregando documentos...</p>
+                ) : documents.length === 0 ? (
+                  <p className="text-sm text-gray-500">Nenhum documento salvo para esta etapa.</p>
+                ) : (
+                  documents.map((doc, index) => (
+                    <div
+                      key={`${doc.id || doc.name}-${index}`}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100"
                     >
-                      Ver
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-gray-600" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {doc.titulo || doc.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {doc.status || "rascunho"}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-500">ID: {doc.id || "sem id"}</span>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
           </div>
@@ -515,3 +418,5 @@ const AIChatWizard = ({
 };
 
 export default AIChatWizard;
+
+
